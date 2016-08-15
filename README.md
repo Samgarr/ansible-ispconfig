@@ -19,6 +19,7 @@ What's not covered (for now)
 * support for nginx
 * ftp quotas and ftps
 * Mailman setup
+* Jailkit setup
 
 
 
