@@ -1,0 +1,9 @@
+---
+- include: base.yml
+- include: mail.yml
+- include: mysql.yml
+- include: webserver.yml
+- include: ftp.yml
+- include: stats.yml
+- include: fail2ban.yml
+- include: bind.yml

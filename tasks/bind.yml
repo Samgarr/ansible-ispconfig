@@ -1,0 +1,6 @@
+---
+- name: install bind dns server
+  apt: name={{ item }}
+  with_items:
+    - bind9
+    - dnsutils

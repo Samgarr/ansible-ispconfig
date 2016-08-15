@@ -1,0 +1,78 @@
+---
+- name: Install webserver
+  apt:
+   name={{ item }}
+  with_items:
+    - apache2
+    - apache2.2-common
+    - apache2-doc
+    - apache2-mpm-prefork
+    - apache2-utils
+    - libexpat1
+    - ssl-cert
+    - libapache2-mod-php5
+    - php5
+    - php5-common
+    - php5-gd
+    - php5-mysql
+    - php5-imap
+    - phpmyadmin
+    - php5-cli
+    - php5-cgi
+    - libapache2-mod-fcgid
+    - apache2-suexec
+    - php-pear
+    - php-auth
+    - php5-mcrypt
+    - mcrypt
+    - php5-imagick
+    - imagemagick
+    - libruby
+    - libapache2-mod-python
+    - php5-curl
+    - php5-intl
+    - php5-memcache
+    - php5-memcached
+    - php5-pspell
+    - php5-recode
+    - php5-sqlite
+    - php5-tidy
+    - php5-xmlrpc
+    - php5-xsl
+    - php5-xcache
+    - memcached
+    - libapache2-mod-passenger
+    - php5-fpm
+    - libapache2-mod-fastcgi
+  tags:
+    - install-webserver
+
+- name: debconf for phpmyadmin
+  debconf:
+    name: phpmyadmin
+    question: phpmyadmin/dbconfig-install
+    value: true
+    vtype: boolean
+
+- name: install phpmyadmin
+  apt:
+    name: phpmyadmin
+
+- name: enable apache2 modules
+  apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items:
+    - suexec
+    - rewrite
+    - ssl
+    - actions
+    - include
+    - dav_fs
+    - dav
+    - auth_digest
+    - cgi
+    - alias
+    - fastcgi
+  notify:
+    - restart apache

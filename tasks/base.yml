@@ -1,0 +1,55 @@
+---
+- name: install keyrings pkgs
+  apt:
+    name={{ item }} state=present
+  with_items:
+    - 'debian-keyring'
+    - 'debian-archive-keyring'
+  register: keyrings
+
+- name: disable sources.list
+  replace:
+    dest: '/etc/apt/sources.list'
+    regexp: '^(deb.*)$'
+    replace: '#\1'
+
+- name: add repos
+  apt_repository:
+    repo={{ item }} state=present update_cache=yes
+  with_items:
+    - 'deb http://ftp.de.debian.org/debian/  jessie main contrib non-free'
+    - 'deb-src http://ftp.de.debian.org/debian/ jessie main contrib non-free'
+    - 'deb http://security.debian.org/ jessie/updates main contrib non-free'
+    - 'deb-src http://security.debian.org/ jessie/updates main contrib non-free'
+    - 'deb http://ftp.de.debian.org/debian/ jessie-updates main contrib non-free'
+    - 'deb-src http://ftp.de.debian.org/debian/ jessie-updates main contrib non-free'
+
+- name: dash config
+  copy: >
+    src=files/preseed/dash
+    dest=/usr/local/src/preseed/
+    owner=root mode=600
+  register: dash_seed
+
+- name: disable dash as default shell
+  command: debconf-set-selections /usr/local/src/preseed/dash
+  register: dash_reconf
+  when: dash_seed.changed
+
+- name: dash reconfigure
+  command: dpkg-reconfigure -fnoninteractive dash
+  when: dash_reconf.changed
+
+- name: various packages
+  apt:
+    name={{ item }} state=present
+  with_items:
+    - ntp
+    - ntpdate
+    - python-virtualenv
+    - mc
+    - python-pip
+    - rkhunter
+    - binutils
+    - sudo
+

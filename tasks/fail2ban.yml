@@ -1,0 +1,21 @@
+---
+- name: install fail2ban
+  apt: name=fail2ban
+
+- name: copy jail.local
+  copy: src=files/jail.local dest=/etc/fail2ban/jail.local
+
+- name: copy pureftpd filter
+  copy: src=files/pureftpd.filter dest=/etc/fail2ban/filter.d/pureftpd.conf
+
+- name: copy dovecot filter
+  copy: src=files/dovecot.filter dest=/etc/fail2ban/filter.d/dovecot-pop3imap.conf
+
+- name: append ignoreregex in the postfixsasl filter
+  lineinfile:
+    dest: /etc/fail2ban/filter.d/postfix-sasl.conf
+    regexp: ''
+    insertafter: EOF
+    line: 'ignoreregex ='
+  notify:
+    - restart fail2ban

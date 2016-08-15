@@ -1,0 +1,23 @@
+---
+- name: install webstats related packages
+  apt: name={{item}}
+  with_items:
+    - vlogger
+    - webalizer
+    - awstats
+    - geoip-database
+    - libclass-dbi-mysql-perl
+
+- name: comment out awstats cron
+  lineinfile:
+    dest: /etc/cron.d/awstats
+    regexp: '{{ item }}'
+    line: '#\1'
+    state: present
+    backrefs: yes
+  with_items:
+      - '^(MAILTO.*)$'
+      - '^(\*\/10.*)$'
+  tags:
+    - awstat-cron
+

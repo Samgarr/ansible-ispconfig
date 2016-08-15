@@ -1,0 +1,46 @@
+---
+- name: install mailing packages
+  apt:
+    name={{ item }} state=present
+  with_items:
+    - postfix
+    - postfix-mysql
+    - dovecot-imapd
+    - dovecot-pop3d
+    - dovecot-mysql
+    - dovecot-sieve
+    - amavisd-new
+    - spamassassin
+    - clamav
+    - clamav-daemon
+    - apt-listchanges
+    - libnet-ldap-perl
+    - libauthen-sasl-perl
+    - libio-string-perl
+    - libio-socket-ssl-perl
+    - libnet-ident-perl
+    - libnet-dns-perl
+
+- name: edit postfix master.cf
+  replace:
+    dest: '/etc/postfix/master.cf'
+    regexp: '{{ item }}'
+    replace: '\1'
+  with_items:
+    - '^#(.*-o syslog_name=postfix/submission)'
+    - '^#(.*-o smtpd_tls_security_level=encrypt)'
+    - '^#(.*-o smtpd_sasl_auth_enable=yes)'
+    - '^#(.*-o smtpd_client_restrictions=permit_sasl_authenticated,reject)'
+    - '^#(.*-o syslog_name=postfix/smtps)'
+    - '^#(.*-o smtpd_tls_wrappermode=yes)'
+    - '^#(submission inet n .* smtpd$)'
+    - '^#(smtps.* smtpd$)'
+  notify:
+    - restart postfix
+
+- name: disable spamassassin
+  service:
+    name: spamassassin
+    enabled: no
+    state: stopped
+
