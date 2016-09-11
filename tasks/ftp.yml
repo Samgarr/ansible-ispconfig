@@ -13,3 +13,29 @@
     dest: /etc/default/pure-ftpd-common
     regexp: '^VIRTUALCHROOT=false'
     replace: 'VIRTUALCHROOT=true'
+
+- name: ensure fstab uses quta
+  mount:
+    name: "{{ item.mount }}"
+    src: "{{ item.device }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.options }},usrjquota=quota.user,grpjquota=quota.group,jqfmt=vfsv0"
+    state: mounted
+  with_items: ansible_mounts
+  when:
+    - item.mount == "/"
+    - item.options.find('quota') < 1
+
+- name: test if quota is enabled
+  shell: quotaon -pa
+  register: quota_test
+  ignore_errors: yes
+
+- name: run quotacheck
+  command: /sbin/quotacheck -avugm
+  when: quota_test.stdout != ""
+
+- name: run quotaon
+  command: /sbin/quotaon -avug
+  when: quota_test.stdout != ""
+
