@@ -39,3 +39,24 @@
   command: /sbin/quotaon -avug
   when: quota_test.stdout != ""
 
+- name: enable TLS
+  copy:
+    content: "2"
+    dest: /etc/pure-ftpd/conf/TLS
+
+# inspired by robgmills/ansible-pure-ftpd
+- name: Generate TLS PEM for pure-ftpd
+  expect:
+    command: openssl req -x509 -nodes -days {{ ftpd_openssl_config.days }} -newkey rsa:{{ ftpd_openssl_config.size }} -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem
+    responses:
+      (?i)country name: "{{ ftpd_openssl_config.country }}"
+      (?i)state or province name: "{{ ftpd_openssl_config.state }}"
+      (?i)locality name: "{{ ftpd_openssl_config.locality }}"
+      (?i)organization name: "{{ ftpd_openssl_config.org }}"
+      (?i)organizational unit name: "{{ ftpd_openssl_config.unit }}"
+      (?i)common name: "{{ ftpd_openssl_config.common }}"
+      (?i)email address: "{{ ftpd_openssl_config.email }}"
+#when: ftpd_pem is not defined and not r_ftppem.stat.exists
+
+- name: Restrict permissions on PEM
+  file: state=file path=/etc/ssl/private/pure-ftpd.pem mode=0600 owner=root group=root
