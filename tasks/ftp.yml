@@ -57,7 +57,7 @@
       (?i)common name: "{{ ftpd_openssl_config.common }}"
       (?i)email address: "{{ ftpd_openssl_config.email }}"
     creates: /etc/ssl/private/pure-ftpd.pem
-  notify: restart pure-ftpd-mysql
+  notify: restart pureftpd
 
 - name: Restrict permissions on PEM
   file: state=file path=/etc/ssl/private/pure-ftpd.pem mode=0600 owner=root group=root

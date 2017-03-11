@@ -10,4 +10,4 @@
   service: name=fail2ban state=restarted
 
 - name: restart pureftpd
-  service: name=pure-ftpd state=restarted
+  systemd: name=pure-ftpd-mysql state=restarted
