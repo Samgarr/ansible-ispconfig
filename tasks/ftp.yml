@@ -21,9 +21,9 @@
     fstype: "{{ item.fstype }}"
     opts: "{{ item.options }},usrjquota=quota.user,grpjquota=quota.group,jqfmt=vfsv0"
     state: mounted
-  with_items: ansible_mounts
+  with_items: "{{ ansible_mounts }}"
   when:
-    - item.mount == "/"
+    - "{{ item.mount == '/' }}"
     - item.options.find('quota') < 1
 
 - name: test if quota is enabled
@@ -33,11 +33,11 @@
 
 - name: run quotacheck
   command: /sbin/quotacheck -avugm
-  when: quota_test.stdout != ""
+  when: quota_test.rc == "0"
 
 - name: run quotaon
   command: /sbin/quotaon -avug
-  when: quota_test.stdout != ""
+  when: quota_test.rc == "0"
 
 - name: enable TLS
   copy:
@@ -56,7 +56,8 @@
       (?i)organizational unit name: "{{ ftpd_openssl_config.unit }}"
       (?i)common name: "{{ ftpd_openssl_config.common }}"
       (?i)email address: "{{ ftpd_openssl_config.email }}"
-#when: ftpd_pem is not defined and not r_ftppem.stat.exists
+    creates: /etc/ssl/private/pure-ftpd.pem
+  notify: restart pure-ftpd-mysql
 
 - name: Restrict permissions on PEM
   file: state=file path=/etc/ssl/private/pure-ftpd.pem mode=0600 owner=root group=root
