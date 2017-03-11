@@ -1,3 +1,13 @@
 mysql_root_password: replaceme!
 server_hostname: "{{ ansible_hostname }}"
+ftpd_openssl_config:
+  days: 7300
+  size: 2048
+  country: US
+  state: na
+  locality: Earth
+  org: Weyland-Yutani
+  unit: xenomorph research
+  common: building better words
+  email: dontwrite@me.com
 

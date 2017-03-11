@@ -40,7 +40,7 @@
   command: dpkg-reconfigure -fnoninteractive dash
   when: dash_reconf.changed
 
-- name: various packages
+- name: needed packages
   apt:
     name={{ item }} state=present
   with_items:
@@ -52,4 +52,11 @@
     - rkhunter
     - binutils
     - sudo
+    - python-pexpect
+
+- name: needed pip packages
+  pip:
+    name: pexpect
+    state: latest
+     
 

@@ -21,9 +21,9 @@
     fstype: "{{ item.fstype }}"
     opts: "{{ item.options }},usrjquota=quota.user,grpjquota=quota.group,jqfmt=vfsv0"
     state: mounted
-  with_items: ansible_mounts
+  with_items: "{{ ansible_mounts }}"
   when:
-    - item.mount == "/"
+    - "{{ item.mount == '/' }}"
     - item.options.find('quota') < 1
 
 - name: test if quota is enabled
@@ -33,9 +33,31 @@
 
 - name: run quotacheck
   command: /sbin/quotacheck -avugm
-  when: quota_test.stdout != ""
+  when: quota_test.rc == "0"
 
 - name: run quotaon
   command: /sbin/quotaon -avug
-  when: quota_test.stdout != ""
+  when: quota_test.rc == "0"
 
+- name: enable TLS
+  copy:
+    content: "2"
+    dest: /etc/pure-ftpd/conf/TLS
+
+# inspired by robgmills/ansible-pure-ftpd
+- name: Generate TLS PEM for pure-ftpd
+  expect:
+    command: openssl req -x509 -nodes -days {{ ftpd_openssl_config.days }} -newkey rsa:{{ ftpd_openssl_config.size }} -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem
+    responses:
+      (?i)country name: "{{ ftpd_openssl_config.country }}"
+      (?i)state or province name: "{{ ftpd_openssl_config.state }}"
+      (?i)locality name: "{{ ftpd_openssl_config.locality }}"
+      (?i)organization name: "{{ ftpd_openssl_config.org }}"
+      (?i)organizational unit name: "{{ ftpd_openssl_config.unit }}"
+      (?i)common name: "{{ ftpd_openssl_config.common }}"
+      (?i)email address: "{{ ftpd_openssl_config.email }}"
+    creates: /etc/ssl/private/pure-ftpd.pem
+  notify: restart pure-ftpd-mysql
+
+- name: Restrict permissions on PEM
+  file: state=file path=/etc/ssl/private/pure-ftpd.pem mode=0600 owner=root group=root
