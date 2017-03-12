@@ -1,0 +1,24 @@
+- name: copy mailman preseed file
+  copy:
+    src: files/preseed/mailman
+    dest: /usr/local/src/preseed/
+
+- name: install mailman package
+  apt:
+    name: mailman
+
+- name: create new list
+  command: newlist -q newlist "{{ mailman_list.email }}" "{{mailman_list.password }}"
+  args:
+    creates: /var/lib/mailman/lists/newlist/config.pck
+
+- name: manage aliases
+  blockinfile:
+    dest: /etc/aliases
+    block: "{{ mailman_aliases }}"
+  register: malias
+
+- name: run newaliases
+  command: newaliases
+  when: malias.changed
+  notify: restart postfix
