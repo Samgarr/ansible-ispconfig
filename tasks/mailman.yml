@@ -22,3 +22,9 @@
   command: newaliases
   when: malias.changed
   notify: restart postfix
+
+- name: enable mailman vhost
+  command: ln -s /etc/mailman/apache.conf /etc/apache2/sites-enabled/mailman.conf
+  args:
+    creates: /etc/apache2/sites-enabled/mailman.conf
+  notify: restart apache
