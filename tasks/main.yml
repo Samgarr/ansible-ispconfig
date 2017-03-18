@@ -7,3 +7,5 @@
 - include: stats.yml
 - include: fail2ban.yml
 - include: bind.yml
+- include: mailman.yml
+  tags: mailman

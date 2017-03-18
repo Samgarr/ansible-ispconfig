@@ -1,0 +1,2 @@
+mailman  mailman/site_languages "en"
+mailman  mailman/create_site_list "note"
