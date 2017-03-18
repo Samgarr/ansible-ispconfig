@@ -1,4 +1,9 @@
 ---
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+
 - name: install keyrings pkgs
   apt:
     name={{ item }} state=present
